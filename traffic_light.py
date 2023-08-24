@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+# https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md
 
 def detect_traffic_light(img_path):
     # Load Image
