@@ -11,17 +11,41 @@ def visualize_results(image, colors, boxes, classes, confidence_scores):
     for i in range(boxes.shape[0]):
         class_id = int(classes[i])
         if class_id in label_map:
-            pass
-            #dar the rest
+            label = label_map[10]
+            box = boxes[i]
+
+            top, left, bottom, right = box
+            left = int(left * width)
+            right = int(right * width)
+            top = int(top * height)
+            bottom = int(bottom * height)
+
+            # Draw bounding box
+            cv2.rectangle(image, (left, top), (right, bottom), (0, 0, 255), 2)
+
+            # Display label
+            label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
+            label_rect_left, label_rect_top = int(left), int(top) - label_size[1]
+            label_rect_right, label_rect_bottom = left + label_size[0], int(top)
+            cv2.rectangle(image, (label_rect_left, label_rect_top), (label_rect_right, label_rect_bottom), (0, 0, 255), -1)
+            cv2.putText(image, label, (left, top), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+    return image
 
 # Path to our downloaded detection model
-PATH_TO_CKPT = "[name of model folder]/saved_model"
+PATH_TO_CKPT = "models\centernet_resnet50_v1_fpn_512x512_kpts_coco17_tpu-8\saved_model"
 
 # Load model and image
 detector = tf.saved_model.load(PATH_TO_CKPT)
-image = cv2.imread("test_1.jpg")
+image = cv2.imread("test_2.jpg")
+
+width = 500
+height = 500
+
+down_size = (width, height)
+image = cv2.resize(image, down_size, interpolation=cv2.INTER_LINEAR)
+
 image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-image_tensor = tf.convert_to_tensor([image_rgb])
+image_tensor = tf.convert_to_tensor(image_rgb, dtype=tf.uint8)[tf.newaxis, ...]
 
 # Detection
 results = detector(image_tensor)

@@ -1,10 +1,10 @@
 # key key
 #. |.  |
 #. V.  V
-# val val
+# # val val
 
-test = {"a": 10, "b": 12}
+# test = {"a": 10, "b": 12}
 
-print(test["a"])
+# print(test["a"])
 
-# print(test[12])
+# # print(test[12])
