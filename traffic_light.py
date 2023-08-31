@@ -61,5 +61,30 @@ def detect_traffic_light(img_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-# detect_traffic_light("Red_yellow_green_traffic_lights.jpg")
-detect_traffic_light("test_4.jpg")
+detect_traffic_light("Red_yellow_green_traffic_lights.jpg")
+# detect_traffic_light("test_4.jpg")
+
+def get_traffic_light_color(cropped_image):
+    # Convert image color to HSV
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # Color Ranges
+    lower_red1 = np.array([0, 50, 50])
+    upper_red1 = np.array([10, 255, 255])
+    lower_red2 = np.array([160, 50, 50])
+    upper_red2 = np.array([180, 255, 255])
+    red_mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+    red_mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+    red_mask = red_mask1 | red_mask2
+
+    yellow_mask = cv2.inRange(hsv, np.array([20, 50, 50]), np.array([30, 255, 255]))
+    green_mask = cv2.inRange(hsv, np.array([40, 50, 50]), np.array([90, 255, 255]))
+
+    combined_mask = red_mask | yellow_mask | green_mask
+
+    # combined_contours, _ = cv2.findContours(combined_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    red_contours, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    yellow_contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    green_contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    return red_contours, yellow_contours, green_contours
