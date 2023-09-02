@@ -61,12 +61,12 @@ def detect_traffic_light(img_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-detect_traffic_light("Red_yellow_green_traffic_lights.jpg")
+# detect_traffic_light("Red_yellow_green_traffic_lights.jpg")
 # detect_traffic_light("test_4.jpg")
 
 def get_traffic_light_color(cropped_image):
     # Convert image color to HSV
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2HSV)
 
     # Color Ranges
     lower_red1 = np.array([0, 50, 50])
@@ -87,4 +87,34 @@ def get_traffic_light_color(cropped_image):
     yellow_contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     green_contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    return red_contours, yellow_contours, green_contours
+    reds = 0
+    yellows = 0
+    greens = 0
+    for contour in red_contours:
+        if 200 < cv2.contourArea(contour) < 3000:
+            x, y, w, h = cv2.boundingRect(contour)
+            if abs(w - h) < 25:
+                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                reds += 1
+    for contour in yellow_contours:
+        if 200 < cv2.contourArea(contour) < 3000:
+            x, y, w, h = cv2.boundingRect(contour)
+            if abs(w - h) < 25:
+                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (30, 248, 252), 2)
+                yellows += 1
+    for contour in green_contours:
+        if 200 < cv2.contourArea(contour) < 3000:
+            x, y, w, h = cv2.boundingRect(contour)
+            if abs(w - h) < 25:
+                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                greens += 1
+
+    color = "Off"
+    if reds > yellows and reds > greens:
+        color = "Red"
+    elif yellows > reds and yellows > greens:
+        color = "Yellow"
+    elif greens > yellows and greens > reds:
+        color = "Green"
+
+    return cropped_image, color
