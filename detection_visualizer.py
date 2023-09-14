@@ -26,10 +26,12 @@ def fast_dominant_color(image):
     small = cv2.resize(image, (10,10), interpolation=cv2.INTER_LINEAR)
     return small.mean(axis=0).mean(axis=0)
 
-def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5):
+def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, max_detections=10):
     height, width, _ = image.shape
 
-    for i in range(boxes.shape[0]):
+    sorted_indices = confidence_scores.argsort()[::-1][:max_detections]
+
+    for i in sorted_indices:
         if confidence_scores[i] >= threshold:
             class_id = int(classes[i])
             if class_id in label_map:
@@ -51,7 +53,7 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5):
                 else:
                     # dom_color = dominant_color(cropped_image)
                     dom_color = fast_dominant_color(cropped_image)
-                    print(f"Dominant Color: {dom_color}")
+                    # print(f"Dominant Color: {dom_color}")
 
 
                 # Draw bounding box
