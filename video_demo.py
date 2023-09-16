@@ -1,7 +1,7 @@
 import cv2
 import tensorflow as tf
 import threading
-from detection_visualizer import visualize_results
+from detection_visualizer import visualize_results, crop_image, attach_to_original
 
 PATH_TO_CKPT = "models\ssd_mobilenet_v2_320x320_coco17_tpu-8\ssd_mobilenet_v2_320x320_coco17_tpu-8\saved_model"
 
@@ -57,7 +57,10 @@ while(vid_capture.isOpened()):
         
         frame = frame_buffer.pop(0)
 
-    frame_resized = cv2.resize(frame, (320, 320), interpolation=cv2.INTER_LINEAR)
+    cropped_area = crop_image(frame)
+    cropped_height, cropped_width, _ = cropped_area.shape
+
+    frame_resized = cv2.resize(cropped_area, (320, 320), interpolation=cv2.INTER_LINEAR)
     frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
     frame_tensor = tf.convert_to_tensor(frame_rgb, dtype=tf.uint8)[tf.newaxis, ...]
 
@@ -76,7 +79,10 @@ while(vid_capture.isOpened()):
     # Annotate the frame
     annotated_frame = visualize_results(frame_resized, boxes, classes, confidence_scores)
 
-    cv2.imshow("Test Video", annotated_frame)
+    annotated_frame = cv2.resize(annotated_frame, (cropped_width, cropped_height), interpolation=cv2.INTER_LINEAR)
+    frame = attach_to_original(annotated_frame, frame)
+
+    cv2.imshow("Test Video", frame)
 
     key = cv2.waitKey(1)
 

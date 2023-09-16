@@ -26,8 +26,35 @@ def fast_dominant_color(image):
     small = cv2.resize(image, (10,10), interpolation=cv2.INTER_LINEAR)
     return small.mean(axis=0).mean(axis=0)
 
+def crop_image(image, crop_factor=0.6):
+    result = image
+    height, width, _ = image.shape 
+
+    spacer = (1 - crop_factor) / 2
+
+    # Transform result
+    top, left, bottom, right = (spacer, spacer, spacer + crop_factor, spacer + crop_factor) # 0.2, 0.2, 0.8, 0.8
+    left = int(left * width)
+    right = int(right * width)
+    top = int(top * height)
+    bottom = int(bottom * height)
+
+    result = image[top:bottom, left:right]
+
+    return result
+
+def attach_to_original(image, original_image, scale=(0.2, 0.2, 0.8, 0.8)):
+    top, left, bottom, right = scale
+    height, width, _ = original_image.shape 
+    left = int(left * width)
+    right = int(right * width)
+    top = int(top * height)
+    bottom = int(bottom * height)
+    original_image[top:bottom, left:right] = image
+    return image
+
 def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, max_detections=10):
-    height, width, _ = image.shape
+    height, width, _ = image.shape # (500, 450, color_info)
 
     sorted_indices = confidence_scores.argsort()[::-1][:max_detections]
 
@@ -39,7 +66,7 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, m
                 color_label = ""
                 box = boxes[i]
 
-                top, left, bottom, right = box
+                top, left, bottom, right = box # (0.6, 0.4, 0.7, 0.5)
                 left = int(left * width)
                 right = int(right * width)
                 top = int(top * height)
