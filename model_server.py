@@ -1,7 +1,9 @@
-import cv2
+from flask import Flask, request, jsonify
 import tensorflow as tf
-import threading
-from detection_visualizer import visualize_results, crop_image, attach_to_original
+import cv2
+import numpy as np
+
+app = Flask(__name__)
 
 PATH_TO_CKPT = "models\ssd_mobilenet_v2_320x320_coco17_tpu-8\ssd_mobilenet_v2_320x320_coco17_tpu-8\saved_model"
 
@@ -12,52 +14,10 @@ print("Loading model! Please wait...")
 detector = tf.saved_model.load(PATH_TO_CKPT)
 print("Model loaded successfully!")
 
-vid_capture = cv2.VideoCapture("videos/traffic_light_video.mp4")
-# vid_capture = cv2.VideoCapture(0)
-
-if (vid_capture.isOpened() == False):
-    print("There was an error opening the file!")
-else:
-    fps = vid_capture.get(5)
-    print(f"Video framerate: {fps} FPS")
-
-    frame_count = vid_capture.get(7)
-    print(f"Frame count: {frame_count}")
-
-frame_buffer = []
-frame_lock = threading.Lock()
-
-def capture_frames():
-    global frame_buffer
-    frame_skip = 5
-    counter = 0
-
-    while vid_capture.isOpened():
-        success, frame = vid_capture.read()
-        counter += 1
-
-        # 
-        # frame skip: 5 5 5 5 5 5 5 5 5 5  5 5 5 5 5 5
-        # current:    1 2 3 4 5 6 7 8 9 10.   [15] ....
-        # counter:    1 2 3 4 5 1 2 3 4 5 1 2 3 4 5 1 2 3 4 5
-
-        if success and counter % frame_skip == 0:
-            with frame_lock:
-                frame_buffer.append(frame)
-        elif not success:
-            break
-
-capture_thread = threading.Thread(target=capture_frames)
-capture_thread.start()
-
-# flag = False
-
-while(vid_capture.isOpened()):
-    with frame_lock:
-        if len(frame_buffer) == 0:
-            continue
-        
-        frame = frame_buffer.pop(0)
+@app.route("/detect", methods=["POST"])
+def detect_objects():
+    frame_data = request.file["frame"].read()
+    frame = cv2.imdecode(np.frombuffer(frame_data, np.uint8), -1)
 
     original_height, original_width, _ = frame.shape
     cropped_area = crop_image(frame)
@@ -91,14 +51,8 @@ while(vid_capture.isOpened()):
 
     frame = cv2.resize(frame, (original_width // 4, original_height // 4), interpolation=cv2.INTER_LINEAR)
 
-    cv2.imshow("Test Video", frame)
+    _, buf = cv2.imencode(".jpg", frame)
+    return buf.tobytes()
 
-    key = cv2.waitKey(1)
-
-    if key == ord('q'):
-        break
-
-
-vid_capture.release()
-capture_thread.join()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    app.run(debug=True)

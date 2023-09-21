@@ -2,6 +2,7 @@ import cv2
 import tensorflow as tf
 from traffic_light import get_traffic_light_color
 from sklearn.cluster import KMeans
+import pandas as pd
 
 # on Andrew's machine, tensorflow uninstalled numpy 1.25.1 --> 1.24.3
 # Models to Test:
@@ -11,6 +12,19 @@ from sklearn.cluster import KMeans
 
 
 label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
+index = ["color", "color_name", "hex", "R", "G", "B"]
+csv = pd.read_csv("Simplified_colors.csv", names=index, header=None)
+
+# Calculate distance to get color name
+def get_color_name(B, G, R):
+    minimum = 10000
+    # d = abs(Red — ithRedColor) + (Green — ithGreenColor) + (Blue — ithBlueColor)
+    for i in range(len(csv)):
+        d = abs(R - int(csv.loc[i, "R"])) + abs(G - int(csv.loc[i, "G"])) + abs(B - int(csv.loc[i, "B"]))
+        if (d <= minimum):
+            minimum = d
+            cname = csv.loc[i, "color_name"]
+    return cname
 
 def dominant_color(image, k=1):
     pixels = image.reshape(-1, 3)
@@ -80,6 +94,7 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, m
                 else:
                     # dom_color = dominant_color(cropped_image)
                     dom_color = fast_dominant_color(cropped_image)
+                    color_label = get_color_name(dom_color[2], dom_color[1], dom_color[0])
                     # print(f"Dominant Color: {dom_color}")
 
 
