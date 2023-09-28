@@ -108,9 +108,9 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, m
                 color_label_rect_left, color_label_rect_top = int(left), int(top) - (label_size[1] * 2)
                 color_label_rect_right, color_label_rect_bottom = left + label_size[0], int(top) - label_size[1]
                 cv2.rectangle(image, (label_rect_left, label_rect_top - 10), (label_rect_right+10, label_rect_bottom), (0, 0, 0), -1)
-                cv2.putText(image, label, (left + 5, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                cv2.putText(image, label, (left + 5, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 cv2.rectangle(image, (color_label_rect_left, color_label_rect_top - 10), (color_label_rect_right+10, color_label_rect_bottom - 10), (0, 0, 0), -1)
-                cv2.putText(image, color_label, (left + 5, top - label_size[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                cv2.putText(image, color_label, (left + 5, top - label_size[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     return image
 
 # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
