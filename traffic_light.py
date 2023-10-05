@@ -90,31 +90,57 @@ def get_traffic_light_color(cropped_image):
     reds = 0
     yellows = 0
     greens = 0
+
+    red_contour = []
+    yellow_contour = []
+    green_contour = []
+
     for contour in red_contours:
         if 200 < cv2.contourArea(contour) < 3000:
             x, y, w, h = cv2.boundingRect(contour)
             if abs(w - h) < 25:
-                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                # cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                if reds == 0:
+                    red_contour = [(x, y), (x + w, y + h), (0, 0, 255), 2]
+                else:
+                    red_contour = []
                 reds += 1
     for contour in yellow_contours:
         if 200 < cv2.contourArea(contour) < 3000:
             x, y, w, h = cv2.boundingRect(contour)
             if abs(w - h) < 25:
-                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (30, 248, 252), 2)
+                # cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (30, 248, 252), 2)
+                if yellows == 0:
+                    yellow_contour = [(x, y), (x + w, y + h), (30, 248, 252), 2]
+                else:
+                    yellow_contour = []
                 yellows += 1
     for contour in green_contours:
         if 200 < cv2.contourArea(contour) < 3000:
             x, y, w, h = cv2.boundingRect(contour)
             if abs(w - h) < 25:
-                cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # cv2.rectangle(cropped_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                if greens == 0:
+                    green_contour = [(x, y), (x + w, y + h), (0, 255, 0), 2]
+                else:
+                    green_contour = []
                 greens += 1
+
+    if red_contour != []:
+        cv2.rectangle(cropped_image, red_contour[0], red_contour[1], red_contour[2], red_contour[3])
+    if yellow_contour != []:
+        cv2.rectangle(cropped_image, yellow_contour[0], yellow_contour[1], yellow_contour[2], yellow_contour[3])
+    if green_contour != []:
+        cv2.rectangle(cropped_image, green_contour[0], green_contour[1], green_contour[2], green_contour[3])
 
     color = "Off"
     if reds > yellows and reds > greens:
         color = "Red"
+        # cv2.rectangle(cropped_image, dominant_contour[0], dominant_contour[1], dominant_contour[2], dominant_contour[3])
     elif yellows > reds and yellows > greens:
         color = "Yellow"
+        # cv2.rectangle(cropped_image, dominant_contour[0], dominant_contour[1], dominant_contour[2], dominant_contour[3])
     elif greens > yellows and greens > reds:
         color = "Green"
-
+        # cv2.rectangle(cropped_image, dominant_contour[0], dominant_contour[1], dominant_contour[2], dominant_contour[3])
     return cropped_image, color
