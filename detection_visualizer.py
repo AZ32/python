@@ -11,7 +11,26 @@ import pandas as pd
 # SSD MobileNet v2 320x320
 
 
-label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
+# label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
+label_map = {1: 'Person', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
+
+# Hazards
+    # Traffic light
+    # Warning Signs
+# Objects
+    # Clothes
+    # Apple (or fruits in general)
+    # Cars
+    # Person
+# Optional:
+    # Health
+        # Blood (trouble telling it apart)
+        # Sunburns
+    # Miscellaneous
+        # Map Elements (tbd on which elements)
+
+# Traffic Light, Person, Cars, Warning Signs, Clothing Color, Blood, Sunburns, Apples(fruits)
+
 index = ["color", "color_name", "hex", "R", "G", "B"]
 csv = pd.read_csv("Simplified_colors.csv", names=index, header=None)
 
@@ -70,47 +89,118 @@ def attach_to_original(image, original_image, scale=(0.2, 0.2, 0.8, 0.8)):
 def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, max_detections=10):
     height, width, _ = image.shape # (500, 450, color_info)
 
-    sorted_indices = confidence_scores.argsort()[::-1][:max_detections]
+    # sorted_indices = confidence_scores.argsort()[::-1][:max_detections]
+    sorted_indices = confidence_scores.argsort()[::-1]
 
-    for i in sorted_indices:
-        if confidence_scores[i] >= threshold:
-            class_id = int(classes[i])
-            if class_id in label_map:
-                label = label_map[class_id]
-                color_label = ""
-                box = boxes[i]
+    detected_items = {}
+    for item in sorted_indices:
+        if confidence_scores[item] >= threshold:
+            class_id = int(classes[item])
+            if class_id not in label_map:
+                continue
+            if class_id in detected_items:
+                detected_items[class_id].append(item)
+            else:
+                detected_items[class_id] = [item]
 
-                top, left, bottom, right = box # (0.6, 0.4, 0.7, 0.5)
-                left = int(left * width)
-                right = int(right * width)
-                top = int(top * height)
-                bottom = int(bottom * height)
+    if 10 in detected_items and max_detections > 0:
+        # print(confidence_scores[detected_items[10]])
+        for item in detected_items[10]:
+            if max_detections == 0:
+                break
+            image = apply_annotation(image, boxes, classes, item)
+            max_detections += 1
 
-                cropped_image = image[top:bottom, left:right]
-                # Draw any extras + figure out color
-                if class_id == 10:
-                    section, color_label = get_traffic_light_color(cropped_image)
-                    image[top:bottom, left:right] = section
-                else:
-                    # dom_color = dominant_color(cropped_image)
-                    dom_color = fast_dominant_color(cropped_image)
-                    color_label = get_color_name(dom_color[2], dom_color[1], dom_color[0])
-                    # print(f"Dominant Color: {dom_color}")
+    if 1 in detected_items and max_detections > 0:
+        # print(confidence_scores[detected_items[10]])
+        for item in detected_items[1]:
+            if max_detections == 0:
+                break
+            image = apply_annotation(image, boxes, classes, item)
+            max_detections += 1
+
+    
+
+    # for i in sorted_indices:
+    #     if confidence_scores[i] >= threshold:
+    #         class_id = int(classes[i])
+    #         if class_id in label_map:
+    #             label = label_map[class_id]
+    #             color_label = ""
+    #             box = boxes[i]
+
+    #             top, left, bottom, right = box # (0.6, 0.4, 0.7, 0.5)
+    #             left = int(left * width)
+    #             right = int(right * width)
+    #             top = int(top * height)
+    #             bottom = int(bottom * height)
+
+    #             cropped_image = image[top:bottom, left:right]
+    #             # Draw any extras + figure out color
+    #             if class_id == 10:
+    #                 section, color_label = get_traffic_light_color(cropped_image)
+    #                 image[top:bottom, left:right] = section
+    #             else:
+    #                 # dom_color = dominant_color(cropped_image)
+    #                 dom_color = fast_dominant_color(cropped_image)
+    #                 color_label = get_color_name(dom_color[2], dom_color[1], dom_color[0])
+    #                 # print(f"Dominant Color: {dom_color}")
 
 
-                # Draw bounding box
-                cv2.rectangle(image, (left, top), (right, bottom), (0, 0, 0), 2)
+    #             # Draw bounding box
+    #             cv2.rectangle(image, (left, top), (right, bottom), (0, 0, 0), 2)
 
-                # Display label
-                label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
-                label_rect_left, label_rect_top = int(left), int(top) - label_size[1]
-                label_rect_right, label_rect_bottom = left + label_size[0], int(top)
-                color_label_rect_left, color_label_rect_top = int(left), int(top) - (label_size[1] * 2)
-                color_label_rect_right, color_label_rect_bottom = left + label_size[0], int(top) - label_size[1]
-                cv2.rectangle(image, (label_rect_left, label_rect_top - 10), (label_rect_right+10, label_rect_bottom), (0, 0, 0), -1)
-                cv2.putText(image, label, (left + 5, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.rectangle(image, (color_label_rect_left, color_label_rect_top - 20), (color_label_rect_right + (20 * (len(color_label) - len(label) if len(color_label) - len(label) > 0 else 0)), color_label_rect_bottom - 10), (0, 0, 0), -1)
-                cv2.putText(image, color_label, (left + 5, top - label_size[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    #             # Display label
+    #             label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
+    #             label_rect_left, label_rect_top = int(left), int(top) - label_size[1]
+    #             label_rect_right, label_rect_bottom = left + label_size[0], int(top)
+    #             color_label_rect_left, color_label_rect_top = int(left), int(top) - (label_size[1] * 2)
+    #             color_label_rect_right, color_label_rect_bottom = left + label_size[0], int(top) - label_size[1]
+    #             cv2.rectangle(image, (label_rect_left, label_rect_top - 10), (label_rect_right+10, label_rect_bottom), (0, 0, 0), -1)
+    #             cv2.putText(image, label, (left + 5, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    #             cv2.rectangle(image, (color_label_rect_left, color_label_rect_top - 20), (color_label_rect_right + (20 * (len(color_label) - len(label) if len(color_label) - len(label) > 0 else 0)), color_label_rect_bottom - 10), (0, 0, 0), -1)
+    #             cv2.putText(image, color_label, (left + 5, top - label_size[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    return image
+
+def apply_annotation(image, boxes, classes, item):
+    height, width, _ = image.shape # (500, 450, color_info)
+    class_id = int(classes[item])
+    label = label_map[class_id]
+    color_label = ""
+    box = boxes[item]
+
+    top, left, bottom, right = box # (0.6, 0.4, 0.7, 0.5)
+    left = int(left * width)
+    right = int(right * width)
+    top = int(top * height)
+    bottom = int(bottom * height)
+
+    cropped_image = image[top:bottom, left:right]
+    # Draw any extras + figure out color
+    if class_id == 10:
+        section, color_label = get_traffic_light_color(cropped_image)
+        image[top:bottom, left:right] = section
+    else:
+        # dom_color = dominant_color(cropped_image)
+        dom_color = fast_dominant_color(cropped_image)
+        color_label = get_color_name(dom_color[2], dom_color[1], dom_color[0])
+        # print(f"Dominant Color: {dom_color}")
+
+
+    # Draw bounding box
+    cv2.rectangle(image, (left, top), (right, bottom), (0, 0, 0), 2)
+
+    # Display label
+    label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
+    label_rect_left, label_rect_top = int(left), int(top) - label_size[1]
+    label_rect_right, label_rect_bottom = left + label_size[0], int(top)
+    color_label_rect_left, color_label_rect_top = int(left), int(top) - (label_size[1] * 2)
+    color_label_rect_right, color_label_rect_bottom = left + label_size[0], int(top) - label_size[1]
+    cv2.rectangle(image, (label_rect_left, label_rect_top - 10), (label_rect_right+10, label_rect_bottom), (0, 0, 0), -1)
+    cv2.putText(image, label, (left + 5, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    cv2.rectangle(image, (color_label_rect_left, color_label_rect_top - 20), (color_label_rect_right + (20 * (len(color_label) - len(label) if len(color_label) - len(label) > 0 else 0)), color_label_rect_bottom - 10), (0, 0, 0), -1)
+    cv2.putText(image, color_label, (left + 5, top - label_size[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
     return image
 
 # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
