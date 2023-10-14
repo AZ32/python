@@ -1,9 +1,14 @@
 red,"Red",#f00,255,0,0
+red,"Red",#9c1616,156,22,22
+red,"Red",#db5353,219,83,83
 green,"Green",#0f0,0,255,0
 blue,"Blue",#00f,0,0,255
+blue,"Blue",#1b1bb5,27,27,181
 black,"Black",#000,0,0,0
 white,"White",#fff,255,255,255
 orange,"Orange",#ed8032,237,128,50
+orange,"Orange",#f59e3b,245,158,59
+orange,"Orange",#e6622e,230,98,46
 yellow,"Yellow",#ff0,255,255,0
 purple,"Purple",#7032ed,112,50,237
 pink,"Pink",#ffc0cb,255,192,203

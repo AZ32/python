@@ -12,7 +12,7 @@ import pandas as pd
 
 
 # label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
-label_map = {1: 'Person', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
+label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
 
 # Hazards
     # Traffic light
@@ -86,6 +86,17 @@ def attach_to_original(image, original_image, scale=(0.2, 0.2, 0.8, 0.8)):
     original_image[top:bottom, left:right] = image
     return image
 
+def highlight_object(image, obj_id, max_detections, detected_items, boxes, classes):
+    for num in obj_id:
+        if num in detected_items and max_detections > 0: # Traffic Light
+            # print(confidence_scores[detected_items[10]])
+            for item in detected_items[num]:
+                if max_detections == 0:
+                    break
+                image = apply_annotation(image, boxes, classes, item)
+                max_detections -= 1
+    return max_detections, image
+
 def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, max_detections=10):
     height, width, _ = image.shape # (500, 450, color_info)
 
@@ -103,21 +114,15 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, m
             else:
                 detected_items[class_id] = [item]
 
-    if 10 in detected_items and max_detections > 0:
-        # print(confidence_scores[detected_items[10]])
-        for item in detected_items[10]:
-            if max_detections == 0:
-                break
-            image = apply_annotation(image, boxes, classes, item)
-            max_detections += 1
+    max_detections, image = highlight_object(image, [10], max_detections, detected_items, boxes, classes) # Traffic Light
+    max_detections, image = highlight_object(image, [1], max_detections, detected_items, boxes, classes) # Person
+    max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Car
+    max_detections, image = highlight_object(image, [13], max_detections, detected_items, boxes, classes) # Warning Signs
+    # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Clothing
+    # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Blood
+    # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Sunburns
+    max_detections, image = highlight_object(image, [52, 53, 55], max_detections, detected_items, boxes, classes) # Fruits
 
-    if 1 in detected_items and max_detections > 0:
-        # print(confidence_scores[detected_items[10]])
-        for item in detected_items[1]:
-            if max_detections == 0:
-                break
-            image = apply_annotation(image, boxes, classes, item)
-            max_detections += 1
 
     
 
@@ -181,9 +186,9 @@ def apply_annotation(image, boxes, classes, item):
         section, color_label = get_traffic_light_color(cropped_image)
         image[top:bottom, left:right] = section
     else:
-        # dom_color = dominant_color(cropped_image)
-        dom_color = fast_dominant_color(cropped_image)
-        color_label = get_color_name(dom_color[2], dom_color[1], dom_color[0])
+        # dom_color = fast_dominant_color(cropped_image)
+        dom_color = dominant_color(cropped_image)
+        color_label = get_color_name(dom_color[0], dom_color[1], dom_color[2])
         # print(f"Dominant Color: {dom_color}")
 
 

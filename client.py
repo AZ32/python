@@ -6,7 +6,8 @@ from detection_visualizer import visualize_results, crop_image, attach_to_origin
 API_URL = "http://127.0.0.1:5000/detect"
 
 # vid_capture = cv2.VideoCapture("videos/traffic_light_video.mp4")
-vid_capture = cv2.VideoCapture("videos/new_york.mp4")
+# vid_capture = cv2.VideoCapture("videos/new_york.mp4")
+vid_capture = cv2.VideoCapture("videos/Fruits.mp4")
 # vid_capture = cv2.VideoCapture(0)
 
 while vid_capture.isOpened():
@@ -36,7 +37,7 @@ while vid_capture.isOpened():
     confidence_scores = np.array(detection_results["confidence_scores"])
 
     # Annotate the frame
-    annotated_frame = visualize_results(frame_resized, boxes, classes, confidence_scores, max_detections=10)
+    annotated_frame = visualize_results(frame_resized, boxes, classes, confidence_scores, max_detections=3)
 
     annotated_frame = cv2.resize(annotated_frame, (cropped_width, cropped_height), interpolation=cv2.INTER_LINEAR)
     frame = attach_to_original(annotated_frame, frame)
