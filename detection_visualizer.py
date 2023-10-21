@@ -186,8 +186,8 @@ def apply_annotation(image, boxes, classes, item):
         section, color_label = get_traffic_light_color(cropped_image)
         image[top:bottom, left:right] = section
     else:
-        # dom_color = fast_dominant_color(cropped_image)
-        dom_color = dominant_color(cropped_image)
+        dom_color = fast_dominant_color(cropped_image)
+        # dom_color = dominant_color(cropped_image)
         color_label = get_color_name(dom_color[0], dom_color[1], dom_color[2])
         # print(f"Dominant Color: {dom_color}")
 
