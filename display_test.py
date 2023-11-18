@@ -25,18 +25,23 @@ while cap.isOpened():
     if ret:
         frame = cv2.resize(frame, (320, 172))
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        bitmap = displayio.Bitmap(320, 172, 3)
+        bitmap = displayio.Bitmap(320, 172, 65536) # 16-bit palette
 
-        palette = displayio.Palette(3)
-        palette[0] = 0x000000
-        palette[1] = 0xFFFFFF
-        palette[2] = 0xFF0000
+        frame_rgb = (frame_rgb // 32).astype("uint16")
+
+        frame_rgb = (frame_rgb[...,0] << 11) | (frame_rgb[...,1] << 5) | (frame_rgb[...,2])
+
+
+        # palette = displayio.Palette(3)
+        # palette[0] = 0x000000
+        # palette[1] = 0xFFFFFF
+        # palette[2] = 0xFF0000
 
         for y in range(320):
             for x in range(172):
                 bitmap[x, y] = frame_rgb[y][x]
 
-        tile_grid = displayio.TileGrid(bitmap, pixel_shader=palette)
+        tile_grid = displayio.TileGrid(bitmap, pixel_shader=displayio.ColorConverter())
         group = displayio.Group()
         group.append(tile_grid)
         disp.show(group)
