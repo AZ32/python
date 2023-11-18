@@ -14,6 +14,8 @@ import pandas as pd
 # label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
 label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
 
+new_label = {1: "Blood"}
+
 # Hazards
     # Traffic light
     # Warning Signs
