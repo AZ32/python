@@ -14,20 +14,23 @@ import pandas as pd
 # label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
 label_map = {1: 'Person', 3: 'Car', 10: 'Traffic Light', 13: 'Stop Sign', 52: "Banana", 53: "Apple", 55: "Orange"}
 
-new_label = {1: "Blood"}
+new_label = {1: "Blood", 53: "Apple", 55: "Orange", 3: "Car", 4: "Warning Sign", 5: "Green Traffic Light", 6: "Red Traffic Light", 7: "Person", 8: "Yellow Traffic Light", 9: "Banana", 10: "Pear", 11: "Sunburn", 12: "Map", 13: "Peach", 14: "Strawberry", 15: "Clothes", 16: "Watermelon", 17: "Grapes", 18: "Cat", 19: "Cherry", 20: "Pineapple", 21: "Tomatoes"}
 
-# Hazards
+fruits = {53, 55, 9, 10, 13, 14, 16, 17, 19, 20, 21}
+
+# Hazards (highest)
     # Traffic light
     # Warning Signs
-# Objects
-    # Clothes
-    # Apple (or fruits in general)
-    # Cars
-    # Person
+# Objects 
+    # 5. Clothes
+    # 2. Apple (or fruits in general)
+    # 1. Cars
+    # 3. Person
+    # 4. Animals
 # Optional:
     # Health
-        # Blood (trouble telling it apart)
-        # Sunburns
+        # 1. Blood (trouble telling it apart)
+        # 2. Sunburns
     # Miscellaneous
         # Map Elements (tbd on which elements)
 
@@ -117,13 +120,15 @@ def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, m
                 detected_items[class_id] = [item]
 
     max_detections, image = highlight_object(image, [10], max_detections, detected_items, boxes, classes) # Traffic Light
-    max_detections, image = highlight_object(image, [1], max_detections, detected_items, boxes, classes) # Person
-    max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Car
     max_detections, image = highlight_object(image, [13], max_detections, detected_items, boxes, classes) # Warning Signs
+    max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Car
+    max_detections, image = highlight_object(image, [52, 53, 55], max_detections, detected_items, boxes, classes) # Fruits
+    max_detections, image = highlight_object(image, [1], max_detections, detected_items, boxes, classes) # Person
+    # Animals
     # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Clothing
     # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Blood
     # max_detections, image = highlight_object(image, [3], max_detections, detected_items, boxes, classes) # Sunburns
-    max_detections, image = highlight_object(image, [52, 53, 55], max_detections, detected_items, boxes, classes) # Fruits
+    # Map Elements
 
 
     
@@ -184,7 +189,7 @@ def apply_annotation(image, boxes, classes, item):
 
     cropped_image = image[top:bottom, left:right]
     # Draw any extras + figure out color
-    if class_id == 10:
+    if class_id == 10: # handle traffic light
         section, color_label = get_traffic_light_color(cropped_image)
         image[top:bottom, left:right] = section
     else:
