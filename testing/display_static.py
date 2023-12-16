@@ -12,7 +12,8 @@ for x in range(320):
         bitmap[x, y] = 1 if 50 <= x <= 270 and 50 <= y <= 122 else 0
 
 # TODO: get BDF font to include here
-font = bitmap_font.load_font("path to BDF font")
+font_file = "fonts/LeagueSpartan-Bold-12.bdf"
+font = bitmap_font.load_font(font_file)
 
 text_area = adafruit_display_text.label.Label(font, text="Hello!", color=0xFFFFFF)
 text_area.x = 0
