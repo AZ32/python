@@ -1,14 +1,14 @@
 import board
-from adafruit_st7789 import St7789
+from adafruit_st7789 import ST7789
 import adafruit_display_text.label
 from adafruit_bitmap_font import bitmap_font
 from displayio import Bitmap, ColorConverter, Palette, Group, TileGrid
 import displayio
 displayio.release_displays()
 spi=board.SPI()
-tft_cs = board.D5
-tft_dc = board.D6
-tft_rst = board.D9
+tft_cs = board.D8
+tft_dc = board.D25
+tft_rst = board.D27
 display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs, reset=tft_rst)
 display = ST7789(display_bus, width=320, height=172, colstart=34, rotation=270)
 
@@ -35,4 +35,4 @@ group = Group()
 group.append(TileGrid(bitmap, pixel_shader=palette))
 group.append(text_area)
 
-disp.show(group)
+display.show(group)
