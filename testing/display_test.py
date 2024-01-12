@@ -40,10 +40,19 @@ disp = st7789.ST7789(spi, rotation=90, width=172, height=320, x_offset=34, # 1.4
 
 # Get Camera Feed
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)  # reduce the width
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 172)  # reduce the height
+
+frame_skip = 2  # Skip every 2 frames
+frame_count = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
+    frame_count += 1
     if ret:
+        if frame_count % frame_skip != 0:
+            continue  # Skip this frame
+
         # Convert the color space from BGR (OpenCV default) to RGB
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
