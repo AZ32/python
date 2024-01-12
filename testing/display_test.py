@@ -48,7 +48,7 @@ while cap.isOpened():
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Resize the frame to fit the display resolution
-        frame = cv2.resize(frame, (disp.width, disp.height))
+        frame = cv2.resize(frame, (disp.height, disp.width))
 
         # Convert the frame to a PIL Image
         frame = Image.fromarray(frame)
