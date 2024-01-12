@@ -1,21 +1,42 @@
 import cv2
 import numpy as np
-# import digitalio
-import displayio
+import digitalio
+import os
+import time
 import board
 import adafruit_st7789
+from adafruit_rgb_display import st7789  # pylint: disable=unused-import
+from PIL import Image, ImageOps
+
+# Button pins for EYESPI Pi Beret
+BUTTON_NEXT = board.D5
+BUTTON_PREVIOUS = board.D6
 
 # Initialize TFT display
-displayio.release_displays()
-# cs_pin = digitalio.DigitalInOut(board.D8)
-# dc_pin = digitalio.DigitalInOut(board.D24)
-# reset_pin = digitalio.DigitalInOut(board.D25)
-tft_cs = board.D5
-tft_dc = board.D6
-spi = board.SPI()
-display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs, reset=board.D9)
+# CS and DC pins for EYEPSPI Pi Beret:
+cs_pin = digitalio.DigitalInOut(board.CE0)
+dc_pin = digitalio.DigitalInOut(board.D25)
 
-disp = adafruit_st7789.ST7789(display_bus, width=320, height=172, rotation=180)
+# Reset pin for EYESPI Pi Beret
+reset_pin = digitalio.DigitalInOut(board.D27)
+
+# Backlight pin for Pi Beret
+backlight = digitalio.DigitalInOut(board.D18)
+backlight.switch_to_output()
+backlight.value = True
+
+# Config for display baudrate (default max is 64mhz):
+BAUDRATE = 64000000
+
+# Setup SPI bus using hardware SPI:
+spi = board.SPI()
+
+disp = st7789.ST7789(spi, rotation=90, width=172, height=320, x_offset=34, # 1.47" ST7789
+                    cs=cs_pin,
+                    dc=dc_pin,
+                    rst=reset_pin,
+                    baudrate=BAUDRATE,
+)
 
 # Get Camera Feed
 cap = cv2.VideoCapture(0)
@@ -23,30 +44,17 @@ cap = cv2.VideoCapture(0)
 while cap.isOpened():
     ret, frame = cap.read()
     if ret:
-        frame = cv2.resize(frame, (320, 172))
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        bitmap = displayio.Bitmap(320, 172, 65535) # 16-bit palette
+        # Convert the color space from BGR (OpenCV default) to RGB
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        frame_rgb = (frame_rgb // 32).astype("uint16")
+        # Resize the frame to fit the display resolution
+        frame = cv2.resize(frame, (disp.width, disp.height))
 
-        frame_rgb = (frame_rgb[...,0] << 11) | (frame_rgb[...,1] << 5) | (frame_rgb[...,2])
+        # Convert the frame to a PIL Image
+        frame = Image.fromarray(frame)
 
-
-        # palette = displayio.Palette(3)
-        # palette[0] = 0x000000
-        # palette[1] = 0xFFFFFF
-        # palette[2] = 0xFF0000
-
-        for y in range(172):
-            for x in range(320):
-                bitmap[x, y] = frame_rgb[y][x]
-
-        tile_grid = displayio.TileGrid(bitmap, pixel_shader=displayio.ColorConverter())
-        group = displayio.Group()
-        group.append(tile_grid)
-        disp.show(group)
-
-        # disp.image(frame_bytes)
+        # Draw the image on the display
+        disp.image(frame)
     else:
         print("Failed to grab frame")
         break
