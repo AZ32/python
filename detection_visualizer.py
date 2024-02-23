@@ -60,6 +60,9 @@ def dominant_color(image, k=1):
     return dominant
 
 def fast_dominant_color(image):
+    # Crop the edges to limit irrelevant colors
+    image = crop_image(image)
+
     # Resize image to a very small size
     small = cv2.resize(image, (10,10), interpolation=cv2.INTER_LINEAR)
     return small.mean(axis=0).mean(axis=0)
