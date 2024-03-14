@@ -6,6 +6,7 @@ import time
 import board
 import adafruit_st7789
 from adafruit_rgb_display import st7789  # pylint: disable=unused-import
+import detection_visualizer
 from PIL import Image, ImageOps
 import torch
 import numpy as np
@@ -57,8 +58,8 @@ class ColorVision:
         self.back_button = self.init_button(BUTTON_PREVIOUS)
 
         print("Loading model! Please wait...")
-        model = torch.hub.load("WongKinYiu/yolov7", "custom", f"{PATH_TO_CUSTOMPT}", trust_repo=True)
-        model.eval()
+        self.model = torch.hub.load("WongKinYiu/yolov7", "custom", f"{PATH_TO_CUSTOMPT}", trust_repo=True)
+        self.model.eval()
         print("Model loaded successfully!")
 
 
@@ -70,11 +71,11 @@ class ColorVision:
         return button
 
     def analyze_feed(self):
-        while cap.isOpened():
-            ret, frame = cap.read()
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
             frame_count += 1
             if ret:
-                if frame_count % frame_skip != 0:
+                if frame_count % self.frame_skip != 0:
                     continue  # Skip this frame
 
                 # Convert the color space from BGR (OpenCV default) to RGB
@@ -84,9 +85,9 @@ class ColorVision:
                 frame = cv2.resize(frame, (disp.height, disp.width))
 
                 # Give the frame to the custom model
-                frame_tensor = torch.from_numpy(frame_rgb).float().div(255.0).unsqueeze(0).permute(0, 3, 1, 2)
+                frame_tensor = torch.from_numpy(frame).float().div(255.0).unsqueeze(0).permute(0, 3, 1, 2)
                 with torch.no_grad():
-                    results = model(frame_tensor)
+                    results = self.model(frame_tensor)
 
                 # get list of box locations
                 # boxes = results['detection_boxes'][0].numpy()
@@ -100,6 +101,22 @@ class ColorVision:
                 # confidence_scores = results['detection_scores'][0].numpy()
                 confidence_scores = boxes[:,:4]
 
+                # Annotate the frame with boxes and labels for object name and color
+                for box, label, confidence in zip(boxes, classes, confidence_scores):
+                    # Draw the bounding box
+                    x1, y1, x2, y2 = box[:4]
+                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 2)
+
+                    color = detection_visualizer.fast_dominant_color(frame)
+                    color_name = detection_visualizer.get_color_name(color)
+
+                    # Draw the label
+                    label = int(label)
+                    confidence = float(confidence)
+                    cv2.putText(frame, f"{label} {confidence} {color_name}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+
+
                 # Convert the frame to a PIL Image
                 frame = Image.fromarray(frame)
 
@@ -109,7 +126,7 @@ class ColorVision:
                 print("Failed to grab frame")
                 break
 
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
 
