@@ -31,7 +31,7 @@ backlight.switch_to_output()
 backlight.value = True
 
 # Config for display baudrate (default max is 64mhz):
-BAUDRATE = 64000000
+BAUDRATE = 32000000
 
 # Setup SPI bus using hardware SPI:
 spi = board.SPI()
@@ -47,13 +47,17 @@ disp = st7789.ST7789(spi, rotation=90, width=172, height=320, x_offset=34, # 1.4
 class ColorVision:
     def __init__(self, camera_path=0):
         # Get Camera Feed
+        print("Initializing camera feed...")
         self.cap = cv2.VideoCapture(camera_path)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)  # reduce the width
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 172)  # reduce the height
 
-        self.frame_skip = 2  # Skip every 2 frames
-        self.frame_count = 0
+        print("Initializing frame settings...")
+        self.fps_cap = 15
+        self.frame_time = 1 / self.fps_cap
+        self.last_frame_time = time.time()
 
+        print("Initializing buttons...")
         self.advance_button = self.init_button(BUTTON_NEXT)
         self.back_button = self.init_button(BUTTON_PREVIOUS)
 
@@ -65,24 +69,28 @@ class ColorVision:
 
 
     def init_button(self, pin):
+        print("Initializing button...")
         button = digitalio.DigitalInOut(pin)
         button.switch_to_input()
         button.pull = digitalio.Pull.UP
         return button
 
     def analyze_feed(self):
+        print("Analyzing feed! Please wait...")
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-            frame_count += 1
-            if ret:
-                if frame_count % self.frame_skip != 0:
-                    continue  # Skip this frame
+            current_time = time.time()
+
+            # frame_count += 1
+            if ret and current_time - self.last_frame_time > self.frame_time:
+                # if frame_count % self.frame_skip != 0:
+                #     continue  # Skip this frame
 
                 # Convert the color space from BGR (OpenCV default) to RGB
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
                 # Resize the frame to fit the display resolution
-                frame = cv2.resize(frame, (disp.height, disp.width))
+                # frame = cv2.resize(frame, (disp.height, disp.width))
 
                 # Give the frame to the custom model
                 frame_tensor = torch.from_numpy(frame).float().div(255.0).unsqueeze(0).permute(0, 3, 1, 2)
