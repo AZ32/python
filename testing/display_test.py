@@ -26,7 +26,8 @@ backlight.switch_to_output()
 backlight.value = True
 
 # Config for display baudrate (default max is 64mhz):
-BAUDRATE = 64000000
+BAUDRATE = 32000000
+# BAUDRATE = 64000000
 
 # Setup SPI bus using hardware SPI:
 spi = board.SPI()
@@ -43,15 +44,22 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)  # reduce the width
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 172)  # reduce the height
 
-frame_skip = 2  # Skip every 2 frames
-frame_count = 0
+# frame_skip = 2  # Skip every 2 frames
+# frame_count = 0
+
+fps_cap = 15
+frame_time = 1 / fps_cap
+last_frame_time = time.time()
 
 while cap.isOpened():
     ret, frame = cap.read()
-    frame_count += 1
-    if ret:
-        if frame_count % frame_skip != 0:
-            continue  # Skip this frame
+    current_time = time.time()
+
+    # frame_count += 1
+    if ret and current_time - last_frame_time > frame_time:
+        last_frame_time = current_time
+        # if frame_count % frame_skip != 0:
+        #     continue  # Skip this frame
 
         # Convert the color space from BGR (OpenCV default) to RGB
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
