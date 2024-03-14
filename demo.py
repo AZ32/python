@@ -31,7 +31,7 @@ backlight.switch_to_output()
 backlight.value = True
 
 # Config for display baudrate (default max is 64mhz):
-BAUDRATE = 64000000
+BAUDRATE = 32000000
 
 # Setup SPI bus using hardware SPI:
 spi = board.SPI()
@@ -47,13 +47,17 @@ disp = st7789.ST7789(spi, rotation=90, width=172, height=320, x_offset=34, # 1.4
 class ColorVision:
     def __init__(self, camera_path=0):
         # Get Camera Feed
+        print("Initializing camera feed...")
         self.cap = cv2.VideoCapture(camera_path)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)  # reduce the width
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 172)  # reduce the height
 
-        self.frame_skip = 2  # Skip every 2 frames
-        self.frame_count = 0
+        print("Initializing frame settings...")
+        self.fps_cap = 30
+        self.frame_time = 1 / self.fps_cap
+        self.last_frame_time = time.time()
 
+        print("Initializing buttons...")
         self.button_5 = self.init_button(BUTTON_NEXT)
         self.button_6 = self.init_button(BUTTON_PREVIOUS)
 
@@ -63,13 +67,14 @@ class ColorVision:
         print("Model loaded successfully!")
 
     def init_button(self, pin):
+        print(f"Initializing button on pin {pin}...")
         button = digitalio.DigitalInOut(pin)
         button.switch_to_input()
         button.pull = digitalio.Pull.UP
         return button
 
     def analyze_feed(self):
-        while cap.isOpened():
+        while self.cap.isOpened():
             _btn_5_val = self.button_5.value
             _btn_6_val = self.button_6.value
 
@@ -78,17 +83,17 @@ class ColorVision:
             elif _btn_6_val:
                 print("Button 6 was pressed!")
 
-            ret, frame = cap.read()
-            frame_count += 1
-            if ret:
-                if frame_count % frame_skip != 0:
-                    continue  # Skip this frame
+            ret, frame = self.cap.read()
+            # frame_count += 1
+            if ret and time.time() - self.last_frame_time > self.frame_time:
+                # if frame_count % frame_skip != 0:
+                #     continue  # Skip this frame
 
                 # Convert the color space from BGR (OpenCV default) to RGB
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # Resize the frame to fit the display resolution
-                frame = cv2.resize(frame, (disp.height, disp.width))
+                # # Resize the frame to fit the display resolution
+                # frame = cv2.resize(frame, (disp.height, disp.width))
 
                 # Give the frame to the AI
                 frame_tensor = torch.from_numpy(frame).float().div(255.0).unsqueeze(0).permute(0, 3, 1, 2)
@@ -117,7 +122,7 @@ class ColorVision:
                 print("Failed to grab frame")
                 break
 
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
 
