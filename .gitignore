@@ -3,3 +3,5 @@ venv(old)/
 models/
 videos/
 *.pyc
+
+.DS_Store
