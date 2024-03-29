@@ -108,8 +108,14 @@ def highlight_object(image, obj_id, max_detections, detected_items, boxes, class
 def visualize_results(image, boxes, classes, confidence_scores, threshold=0.5, max_detections=10):
     height, width, _ = image.shape # (500, 450, color_info)
 
+    # print("CONFIDENCE SCORES")
+    # print(confidence_scores)
+
     # sorted_indices = confidence_scores.argsort()[::-1][:max_detections]
     sorted_indices = confidence_scores.argsort()[::-1]
+
+    # print("SORTED INDICIES")
+    # print(sorted_indices)
 
     detected_items = {}
     for item in sorted_indices:
