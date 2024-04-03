@@ -6,7 +6,7 @@ from demo_visualizer import optimized_visualize_results
 # import threading
 # from queue import Queue
 
-PATH_TO_CUSTOMPT = "models/Custom/best.pt"
+PATH_TO_CUSTOMPT = "models/Custom/bestv9.pt"
 
 class ColorVision:
     def __init__(self, camera_path=0):
@@ -56,5 +56,5 @@ class ColorVision:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    color_vision = ColorVision("videos/street.mp4")
+    color_vision = ColorVision("videos/Fruits.mp4")
     color_vision.analyze_feed()

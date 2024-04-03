@@ -77,8 +77,8 @@ def optimized_visualize_results(frame, boxes, classes, confidence_scores, max_de
         class_name = classes[i]
         confidence = confidence_scores[i]
 
-        if confidence < 0.5:
-            continue
+        # if confidence < 0.5:
+        #     continue
         
         # Extract bounding box coordinates
         x_min, y_min, x_max, y_max = box
