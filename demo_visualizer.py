@@ -109,3 +109,50 @@ def optimized_visualize_results(frame, boxes, classes, confidence_scores, max_de
         count += 1
     
     return frame
+
+def improved_visualize_results(frame, boxes, classes, confidence_scores, max_detections=5, crop_margin=0.2):
+    sorted_indices = np.argsort(confidence_scores)[::-1]
+    count = 0
+
+    for i in sorted_indices:
+        if count >= max_detections:
+            break
+        box = boxes[i]
+        class_name = classes[i]
+        confidence = confidence_scores[i]
+
+        x_min, y_min, x_max, y_max = box
+
+        center_x_min = x_min + (x_max - x_min) * crop_margin
+        center_x_max = x_max - (x_max - x_min) * crop_margin
+        center_y_min = y_min + (y_max - y_min) * crop_margin
+        center_y_max = y_max - (y_max - y_min) * crop_margin
+
+        # Extract the color of the detected object
+        bbox = frame[int(center_y_min):int(center_y_max), int(center_x_min):int(center_x_max)]
+        avg_color_per_row = np.average(bbox, axis=0)
+        avg_color = np.average(avg_color_per_row, axis=0)
+        B, G, R = int(avg_color[0]), int(avg_color[1]), int(avg_color[2])
+        color_name = get_color_name(B, G, R, csv)
+
+        # Draw bounding box
+        cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 0, 0), 2)
+
+        # Prepare text for class name and confidence
+        label = f'{class_name}: {confidence*100:.2f}%'
+        color_label = f'Color: {color_name}'
+
+        # Determine text size to create a background for it
+        (label_width, label_height), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        (color_label_width, color_label_height), _ = cv2.getTextSize(color_label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+
+        # Draw background for text
+        cv2.rectangle(frame, (int(x_min), int(y_min) - 35), (int(x_min) + max(label_width, color_label_width), int(y_min)), (0, 0, 0), cv2.FILLED)
+
+        # Put text on the frame
+        cv2.putText(frame, label, (int(x_min), int(y_min) - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        cv2.putText(frame, color_label, (int(x_min), int(y_min) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
+        count += 1
+
+    return frame

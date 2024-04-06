@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 from PIL import Image
 import torch
-from demo_visualizer import optimized_visualize_results
+from demo_visualizer import improved_visualize_results
 # import threading
 # from queue import Queue
 
-PATH_TO_CUSTOMPT = "models/Custom/bestv9.pt"
+PATH_TO_CUSTOMPT = "models/Custom/bestv11.pt"
 
 class ColorVision:
     def __init__(self, camera_path=0):
@@ -42,7 +42,7 @@ class ColorVision:
                 classes = items["name"].values
                 confidence_scores = items["confidence"].values
 
-                annotated_frame = optimized_visualize_results(frame, boxes, classes, confidence_scores, max_detections=3)
+                annotated_frame = improved_visualize_results(frame, boxes, classes, confidence_scores, max_detections=3)
                 # annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
                 cv2.imshow('Color Vision', annotated_frame)
 
@@ -56,5 +56,5 @@ class ColorVision:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    color_vision = ColorVision("videos/Fruits.mp4")
+    color_vision = ColorVision("videos/ney_york_clip.mp4")
     color_vision.analyze_feed()
