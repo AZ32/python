@@ -1,0 +1,41 @@
+red,"Red",#f00,255,0,0
+red,"Red",#9c1616,156,22,22
+red,"Red",#db5353,219,83,83
+green,"Green",#0f0,0,255,0
+green,"Green",#59f081,89,240,129
+green,"Green",#05541a,5,84,26
+green,"Green",#b4db46,180,219,70
+green,"Green",#849560,132,149,96
+green,"Green",#142B02, 20, 43, 2
+turquoise, "Turquiose", #3cdec3,60,222,195
+turquoise, "Turquiose", #54d7e8,84,215,232
+turquoise, "Turquiose", #56e8c1,86,232,193
+blue,"Blue",#00f,0,0,255
+blue,"Blue",#1b1bb5,27,27,181
+blue,"Blue",#6f9df7,111,157,247
+black,"Black",#000,0,0,0
+black,"Black",#110B0F, 17, 11, 15
+black,"Black",#413633, 65, 54, 51
+black,"Black",#292728, 41, 39, 40
+white,"White",#fff,255,255,255
+white,"White",#CBC09E, 203, 192, 158
+orange,"Orange",#ed8032,237,128,50
+orange,"Orange",#f59e3b,245,158,59
+orange,"Orange",#e6622e,230,98,46
+yellow,"Yellow",#ff0,255,255,0
+yellow,"Yellow",#dbf533,219,245,51
+yellow,"Yellow",#fcd305,252,211,5
+yellow,"Yellow",#d1c002,209,192,2
+purple,"Purple",#7032ed,112,50,237
+purple,"Purple",#8761d4,135,97,212
+purple,"Purple",#2a0f61,42,15,97
+peach,"Peach",#E2B899, 226, 184, 153
+peach,"Peach",#E58F70, 229, 143, 112
+pink,"Pink",#ffc0cb,255,192,203
+pink,"Pink",#fa617b,250,97,123
+pink,"Pink",#de5f74,222,95,116
+pink,"Pink",#F8BFCB, 248, 191, 203
+gray,"Gray",#808080,128,128,128
+gray,"Gray",#4F4A41, 79, 74, 65
+gray,"Gray",#8C7C72, 140, 124, 114
+brown,"Brown",#63400f,99,64,15

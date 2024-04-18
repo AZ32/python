@@ -26,7 +26,8 @@ backlight.switch_to_output()
 backlight.value = True
 
 # Config for display baudrate (default max is 64mhz):
-BAUDRATE = 32000000
+# BAUDRATE = 32000000
+BAUDRATE = 40000000
 # BAUDRATE = 64000000
 
 # Setup SPI bus using hardware SPI:
